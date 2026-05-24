@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Next.js build output and caches
+.next/
+out/
+
+# Python caches and virtual environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE and OS files
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Local Git metadata backup from nested repositories
+.git-backups/
