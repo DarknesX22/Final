@@ -57,7 +57,7 @@ export default function ForgotPasswordPage() {
           >
             <h1 className="text-3xl font-bold mb-4">Forgot Password?</h1>
             <p className="text-gray-600">
-              Enter your email address and we'll send you a link to reset your password.
+              Enter your email address and we'll send a new auto-generated password to your inbox.
             </p>
           </motion.div>
 
@@ -97,7 +97,7 @@ export default function ForgotPasswordPage() {
                       disabled={loading}
                       className="w-full bg-black text-white py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors duration-200 disabled:opacity-50"
                     >
-                      {loading ? 'Sending...' : 'Send Reset Link'}
+                      {loading ? 'Sending...' : 'Send New Password'}
                     </Button>
                   </form>
                 )}
