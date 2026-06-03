@@ -1239,7 +1239,7 @@ export default function DashboardPage() {
                         <motion.div key={interval.label}
                           initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: idx * 0.05 }}
-                          className={`rounded-2xl border-2 p-4 ${bgCard}`}>
+                          className={`rounded-2xl border-2 p-4 flex flex-col ${bgCard}`}>
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-1.5">
                               <Clock className="w-3 h-3 text-gray-400" />
@@ -1271,7 +1271,7 @@ export default function DashboardPage() {
                             />
                           </div>
                           {hasData && (
-                            <div className="flex flex-wrap gap-1 mb-3">
+                            <div className="flex flex-wrap gap-1 mb-3 flex-1 content-start">
                               {interval.coins.map((c: any) => {
                                 const sym = c.coin.replace('USDT','');
                                 const img = COIN_IMG[sym];
@@ -1292,6 +1292,7 @@ export default function DashboardPage() {
                               })}
                             </div>
                           )}
+                          {!hasData && <div className="flex-1" />}
                           {hasData && (
                             <button
                               onClick={() => setIntervalModal(interval)}
