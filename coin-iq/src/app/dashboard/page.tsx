@@ -1271,7 +1271,7 @@ export default function DashboardPage() {
                             />
                           </div>
                           {hasData && (
-                            <div className="flex flex-wrap gap-1 mb-3 flex-1 content-start">
+                            <div className="flex flex-wrap gap-x-2 gap-y-2 mb-3 flex-1 content-start">
                               {interval.coins.map((c: any) => {
                                 const sym = c.coin.replace('USDT','');
                                 const img = COIN_IMG[sym];
