@@ -3,17 +3,9 @@
 import { motion } from '@/components/providers';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import PredictionPreview from '@/components/prediction-preview';
-import { AnimatedStatCard } from '@/components/ui/AnimatedStatCard';
 import { CryptoIcon } from '@/components/ui/icons/CryptoIcon';
-import TestimonialsCarousel from '@/components/TestimonialsCarousel';
 import CryptoTicker from '@/components/CryptoTicker';
 import InfiniteTestimonials from '@/components/InfiniteTestimonials';
-import CandlestickChart from '@/components/charts/candlestick-chart';
-import LineChart from '@/components/charts/line-chart';
-import RiskAssessment from '@/components/charts/risk-assessment';
 import AuthModal from '@/components/AuthModal';
 import { useState, useEffect, useCallback } from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
@@ -169,7 +161,6 @@ function HomePredictionCards() {
 }
 
 export default function Home() {
-  const [selectedPeriod, setSelectedPeriod] = useState('1W');
   const authed = useAuth();
   const [authModal, setAuthModal] = useState<{ open: boolean; reason: string }>({ open: false, reason: '' });
 
@@ -180,87 +171,7 @@ export default function Home() {
       setAuthModal({ open: true, reason });
     }
   }, [authed]);
-  
-  // Function to generate chart data based on selected period
-  const generateChartData = (period: string) => {
-    const now = Date.now();
-    const basePrice = 43250;
-    
-    switch(period) {
-      case '1D':
-        // Hourly data for 1 day
-        return Array.from({ length: 24 }, (_, i) => {
-          const time = now - (23 - i) * 60 * 60 * 1000;
-          const variation = (Math.random() - 0.5) * 0.005; // -0.25% to +0.25%
-          const price = basePrice * (1 + variation);
-          return {
-            x: time,
-            y: price,
-            label: new Date(time).getHours().toString()
-          };
-        });
-      case '1W':
-        // Daily data for 1 week
-        return [
-          { x: now - 6 * 24 * 60 * 60 * 1000, y: 42000, label: 'Mon' },
-          { x: now - 5 * 24 * 60 * 60 * 1000, y: 42500, label: 'Tue' },
-          { x: now - 4 * 24 * 60 * 60 * 1000, y: 43000, label: 'Wed' },
-          { x: now - 3 * 24 * 60 * 60 * 1000, y: 42800, label: 'Thu' },
-          { x: now - 2 * 24 * 60 * 60 * 1000, y: 43200, label: 'Fri' },
-          { x: now - 1 * 24 * 60 * 60 * 1000, y: 43500, label: 'Sat' },
-          { x: now, y: 43250, label: 'Sun' },
-          // Future predictions
-          { x: now + 1 * 24 * 60 * 60 * 1000, y: 43700, label: 'Mon' },
-          { x: now + 2 * 24 * 60 * 60 * 1000, y: 44000, label: 'Tue' },
-          { x: now + 3 * 24 * 60 * 60 * 1000, y: 44200, label: 'Wed' },
-          { x: now + 4 * 24 * 60 * 60 * 1000, y: 44500, label: 'Thu' },
-          { x: now + 5 * 24 * 60 * 60 * 1000, y: 44800, label: 'Fri' },
-          { x: now + 6 * 24 * 60 * 60 * 1000, y: 45000, label: 'Sat' },
-        ];
-      case '1M':
-        // Daily data for 1 month
-        return Array.from({ length: 30 }, (_, i) => {
-          const time = now - (29 - i) * 24 * 60 * 60 * 1000;
-          const variation = (Math.random() - 0.5) * 0.1; // -5% to +5%
-          const price = basePrice * (1 + variation);
-          return {
-            x: time,
-            y: price,
-            label: `Day ${i+1}`
-          };
-        });
-      case '3M':
-        // Weekly data for 3 months
-        return Array.from({ length: 12 }, (_, i) => {
-          const time = now - (11 - i) * 7 * 24 * 60 * 60 * 1000;
-          const variation = (Math.random() - 0.5) * 0.15; // -7.5% to +7.5%
-          const price = basePrice * (1 + variation);
-          return {
-            x: time,
-            y: price,
-            label: `Week ${i+1}`
-          };
-        });
-      default:
-        return [
-          { x: now - 6 * 24 * 60 * 60 * 1000, y: 42000, label: 'Mon' },
-          { x: now - 5 * 24 * 60 * 60 * 1000, y: 42500, label: 'Tue' },
-          { x: now - 4 * 24 * 60 * 60 * 1000, y: 43000, label: 'Wed' },
-          { x: now - 3 * 24 * 60 * 60 * 1000, y: 42800, label: 'Thu' },
-          { x: now - 2 * 24 * 60 * 60 * 1000, y: 43200, label: 'Fri' },
-          { x: now - 1 * 24 * 60 * 60 * 1000, y: 43500, label: 'Sat' },
-          { x: now, y: 43250, label: 'Sun' },
-        ];
-    }
-  };
-  
-  const [chartData, setChartData] = useState(generateChartData(selectedPeriod));
-  
-  const updateChartData = (period: string) => {
-    setSelectedPeriod(period);
-    setChartData(generateChartData(period));
-  };
-  
+
   return (
     <div className="min-h-screen bg-white text-black">
       <Navbar />
