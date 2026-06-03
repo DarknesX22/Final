@@ -6,7 +6,7 @@ import {
   TrendingUp, TrendingDown, BarChart3, Activity, User,
   ArrowUpRight, Sparkles, PieChart, RefreshCw, ChevronUp, ChevronDown,
   Brain, Cpu, BookOpen, Award, CheckCircle, ArrowBigUp, ArrowBigDown,
-  History, Clock, Target, Play, Square, Zap, Calendar, Lock, RotateCcw, Globe,
+  History, Clock, Target, Play, Square, Zap, Calendar, Lock, RotateCcw, Globe, Eye, X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { getCryptoData } from '@/lib/cryptoService';
@@ -437,6 +437,7 @@ export default function DashboardPage() {
   const [dailyData, setDailyData]           = useState<any>(null);
   const [dailyLoading, setDailyLoading]     = useState(false);
   const [recording, setRecording]           = useState<boolean | null>(null);
+  const [intervalModal, setIntervalModal]   = useState<any>(null);
 
   const [predictions, setPredictions] = useState<Prediction[]>(
     ALL_COINS.map(c => ({ ...c, currentPrice: 0, direction: 'UP' as const,
@@ -1108,6 +1109,122 @@ export default function DashboardPage() {
                     </div>
                   )}
 
+                  {/* Interval detail modal */}
+                  <AnimatePresence>
+                    {intervalModal && (
+                      <motion.div
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+                        onClick={() => setIntervalModal(null)}>
+                        <motion.div
+                          initial={{ scale: 0.95, opacity: 0, y: 12 }}
+                          animate={{ scale: 1, opacity: 1, y: 0 }}
+                          exit={{ scale: 0.95, opacity: 0, y: 12 }}
+                          transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+                          className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col border border-gray-200"
+                          onClick={e => e.stopPropagation()}>
+                          {/* Modal header */}
+                          <div className="bg-gray-900 px-6 py-4 flex items-center justify-between shrink-0">
+                            <div>
+                              <div className="flex items-center gap-2 mb-0.5">
+                                <Clock className="w-4 h-4 text-gray-400" />
+                                <h3 className="font-black text-white text-base">{intervalModal.label} — Predictions</h3>
+                                {intervalModal.locked
+                                  ? <span className="flex items-center gap-1 text-[10px] font-bold text-gray-400 bg-white/10 border border-white/20 px-2 py-0.5 rounded-full"><Lock className="w-2.5 h-2.5" /> locked</span>
+                                  : <span className="flex items-center gap-1 text-[10px] font-bold text-blue-400 bg-blue-500/20 border border-blue-400/30 px-2 py-0.5 rounded-full"><span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" /> live</span>
+                                }
+                              </div>
+                              <p className="text-xs text-gray-400">
+                                {intervalModal.correct} / {intervalModal.total} correct
+                                {intervalModal.accuracy_pct != null && ` · ${intervalModal.accuracy_pct}% accuracy`}
+                              </p>
+                            </div>
+                            <button onClick={() => setIntervalModal(null)}
+                              className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+                              <X className="w-4 h-4 text-white" />
+                            </button>
+                          </div>
+                          {/* Modal body */}
+                          <div className="overflow-y-auto flex-1">
+                            <table className="w-full text-sm">
+                              <thead className="sticky top-0 bg-gray-50 border-b border-gray-200 z-10">
+                                <tr>
+                                  <th className="text-left px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Coin</th>
+                                  <th className="text-center px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Predicted</th>
+                                  <th className="text-center px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Actual</th>
+                                  <th className="text-right px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Price Then</th>
+                                  <th className="text-right px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Change</th>
+                                  <th className="text-center px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Result</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-100">
+                                {(intervalModal.coins || []).map((c: any) => {
+                                  const sym = c.coin.replace('USDT','');
+                                  const img = COIN_IMG[sym];
+                                  const isCorrect = c.correct === true;
+                                  const isWrong   = c.correct === false;
+                                  return (
+                                    <tr key={c.coin} className="hover:bg-gray-50 transition-colors">
+                                      <td className="px-4 py-3">
+                                        <div className="flex items-center gap-2.5">
+                                          <div className={`w-8 h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 ${
+                                            isCorrect ? 'ring-[3px] ring-emerald-500' : isWrong ? 'ring-[3px] ring-red-800' : 'ring-1 ring-gray-200'
+                                          }`}>
+                                            {img
+                                              ? <img src={img} alt={sym} className="w-full h-full object-contain" />
+                                              : <span className="text-[9px] font-black text-gray-600">{sym.slice(0,2)}</span>
+                                            }
+                                          </div>
+                                          <div>
+                                            <p className="font-bold text-gray-900 text-sm leading-tight">{sym}</p>
+                                            <p className="text-[10px] text-gray-400">{c.coin}</p>
+                                          </div>
+                                        </div>
+                                      </td>
+                                      <td className="px-4 py-3 text-center">
+                                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${
+                                          c.predicted_dir === 'UP' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+                                        }`}>
+                                          {c.predicted_dir === 'UP' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                                          {c.predicted_dir ?? '—'}
+                                        </span>
+                                      </td>
+                                      <td className="px-4 py-3 text-center">
+                                        {c.actual_dir ? (
+                                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${
+                                            c.actual_dir === 'UP' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+                                          }`}>
+                                            {c.actual_dir === 'UP' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                                            {c.actual_dir}
+                                          </span>
+                                        ) : <span className="text-gray-300 text-xs">—</span>}
+                                      </td>
+                                      <td className="px-4 py-3 text-right font-mono text-xs text-gray-600">
+                                        {c.price_then != null ? `$${Number(c.price_then).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}` : '—'}
+                                      </td>
+                                      <td className="px-4 py-3 text-right">
+                                        {c.change_pct != null ? (
+                                          <span className={`text-xs font-bold ${c.change_pct >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                            {c.change_pct >= 0 ? '+' : ''}{c.change_pct.toFixed(2)}%
+                                          </span>
+                                        ) : <span className="text-gray-300 text-xs">—</span>}
+                                      </td>
+                                      <td className="px-4 py-3 text-center">
+                                        {isCorrect && <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-700">✓ Correct</span>}
+                                        {isWrong   && <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-black bg-red-100 text-red-800">✗ Wrong</span>}
+                                        {!isCorrect && !isWrong && <span className="text-gray-300 text-xs">Pending</span>}
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </motion.div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   {/* Interval cards grid */}
                   <div className="p-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                     {(dailyData.intervals || []).map((interval: any, idx: number) => {
@@ -1154,15 +1271,17 @@ export default function DashboardPage() {
                             />
                           </div>
                           {hasData && (
-                            <div className="flex flex-wrap gap-1">
+                            <div className="flex flex-wrap gap-1 mb-3">
                               {interval.coins.map((c: any) => {
                                 const sym = c.coin.replace('USDT','');
                                 const img = COIN_IMG[sym];
+                                const isCorrect = c.correct === true;
+                                const isWrong   = c.correct === false;
                                 return (
                                   <div key={c.coin}
                                     title={`${sym}: ${c.predicted_dir} → ${c.actual_dir ?? '?'} (${c.change_pct != null ? (c.change_pct >= 0 ? '+' : '') + c.change_pct.toFixed(2) + '%' : '—'})`}
-                                    className={`w-5 h-5 rounded-full flex items-center justify-center ring-1 overflow-hidden cursor-default ${
-                                      c.correct === true ? 'ring-emerald-400' : c.correct === false ? 'ring-rose-400' : 'ring-gray-200'
+                                    className={`w-5 h-5 rounded-full overflow-hidden flex items-center justify-center cursor-default ${
+                                      isCorrect ? 'ring-[2.5px] ring-emerald-500' : isWrong ? 'ring-[2.5px] ring-red-800' : 'ring-1 ring-gray-200'
                                     }`}>
                                     {img
                                       ? <img src={img} alt={sym} className="w-full h-full object-contain" />
@@ -1172,6 +1291,13 @@ export default function DashboardPage() {
                                 );
                               })}
                             </div>
+                          )}
+                          {hasData && (
+                            <button
+                              onClick={() => setIntervalModal(interval)}
+                              className="w-full mt-1 py-1.5 px-3 bg-gray-900 hover:bg-gray-700 text-white text-[11px] font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5">
+                              <Eye className="w-3 h-3" /> View
+                            </button>
                           )}
                         </motion.div>
                       );
