@@ -49,7 +49,43 @@ function readMins(body: string) {
   return Math.max(1, Math.ceil(body.split(' ').length / 200));
 }
 
-// ── Source badge ──────────────────────────────────────────────────────────────
+// ── Image with graceful fallback ─────────────────────────────────────────────
+const SOURCE_COLORS: Record<string, string> = {
+  CoinDesk:      '#3b82f6',
+  CoinTelegraph: '#f59e0b',
+  Decrypt:       '#8b5cf6',
+};
+
+function NewsImage({
+  src, alt, source, className,
+}: { src: string; alt: string; source: string; className?: string }) {
+  const [failed, setFailed] = useState(false);
+  const color = SOURCE_COLORS[source] ?? '#6b7280';
+  const initials = source.slice(0, 2).toUpperCase();
+
+  if (!src || failed) {
+    return (
+      <div
+        className={`flex items-center justify-center ${className ?? ''}`}
+        style={{ background: `${color}18` }}
+      >
+        <span
+          className="text-2xl font-black"
+          style={{ color }}
+        >{initials}</span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      onError={() => setFailed(true)}
+    />
+  );
+}
 function SourceBadge({ source }: { source: string }) {
   const s = SOURCE_STYLE[source] ?? { badge: 'bg-gray-100 text-gray-600 border border-gray-200', bar: 'bg-gray-400' };
   return (
@@ -101,11 +137,11 @@ function ArticleModal({ article, onClose }: { article: NewsArticle; onClose: () 
 
           {/* Hero image */}
           <div className="aspect-[16/7] overflow-hidden rounded-t-3xl sm:rounded-t-2xl bg-gray-100">
-            <img
+            <NewsImage
               src={article.imageUrl}
               alt={article.title}
+              source={article.source}
               className="w-full h-full object-cover"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           </div>
 
@@ -162,14 +198,11 @@ function FeaturedCard({ article, onClick }: { article: NewsArticle; onClick: () 
       className="group relative rounded-2xl overflow-hidden cursor-pointer bg-gray-100 h-full min-h-[400px] flex flex-col justify-end border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
       onClick={onClick}
     >
-      <img
+      <NewsImage
         src={article.imageUrl}
         alt={article.title}
+        source={article.source}
         className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
-        onError={(e) => {
-          (e.target as HTMLImageElement).src =
-            `https://placehold.co/800x500/f3f4f6/9ca3af?text=${encodeURIComponent(article.source)}`;
-        }}
       />
       {/* Gradient */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
@@ -202,14 +235,11 @@ function SecondaryCard({ article, onClick }: { article: NewsArticle; onClick: ()
       className="group relative rounded-2xl overflow-hidden cursor-pointer bg-gray-100 flex flex-col justify-end min-h-[190px] border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
       onClick={onClick}
     >
-      <img
+      <NewsImage
         src={article.imageUrl}
         alt={article.title}
+        source={article.source}
         className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
-        onError={(e) => {
-          (e.target as HTMLImageElement).src =
-            `https://placehold.co/600x300/f3f4f6/9ca3af?text=${encodeURIComponent(article.source)}`;
-        }}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
       <div className="relative p-4 sm:p-5">
@@ -237,14 +267,11 @@ function ListCard({ article, index, onClick }: { article: NewsArticle; index: nu
     >
       {/* Thumbnail */}
       <div className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
-        <img
+        <NewsImage
           src={article.imageUrl}
           alt={article.title}
+          source={article.source}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src =
-              `https://placehold.co/96x96/f3f4f6/9ca3af?text=${article.source.slice(0, 2)}`;
-          }}
         />
       </div>
 
