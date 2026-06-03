@@ -20,10 +20,10 @@ const LINKS = {
     { label: 'Login',       href: '/login' },
   ],
   Legal: [
-    { label: 'Privacy Policy',    href: '#' },
-    { label: 'Terms of Service',  href: '#' },
-    { label: 'Cookie Policy',     href: '#' },
-    { label: 'Disclaimer',        href: '#' },
+    { label: 'Privacy Policy',    href: '/legal/privacy'    },
+    { label: 'Terms of Service',  href: '/legal/terms'      },
+    { label: 'Cookie Policy',     href: '/legal/cookies'    },
+    { label: 'Disclaimer',        href: '/legal/disclaimer' },
   ],
 };
 
@@ -101,9 +101,19 @@ export default function Footer() {
       <div className="border-t border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-gray-600">© 2026 Coin-IQ. All rights reserved.</p>
-          <p className="text-xs text-gray-600 text-center">
-            Not financial advice. Cryptocurrency trading involves significant risk.
-          </p>
+          <div className="flex items-center gap-4 flex-wrap justify-center">
+            {[
+              { label: 'Privacy', href: '/legal/privacy' },
+              { label: 'Terms',   href: '/legal/terms' },
+              { label: 'Cookies', href: '/legal/cookies' },
+              { label: 'Disclaimer', href: '/legal/disclaimer' },
+            ].map(l => (
+              <Link key={l.href} href={l.href}
+                className="text-xs text-gray-600 hover:text-gray-300 transition-colors">
+                {l.label}
+              </Link>
+            ))}
+          </div>
           <div className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
             <span className="text-xs text-gray-500">All systems operational</span>
