@@ -9,6 +9,7 @@ import { useTopCryptos } from '@/hooks/useCryptoData';
 import CryptoDetailsModal from '@/components/CryptoDetailsModal';
 import { useState } from 'react';
 import { CryptoData } from '@/types/crypto';
+import { getCoinImage } from '@/lib/coinImages';
 
 export default function MarketsPage() {
   const { cryptos, loading, error } = useTopCryptos(20);
@@ -74,12 +75,11 @@ export default function MarketsPage() {
                     <div className="p-5">
                       <div className="flex items-center mb-4">
                         <img 
-                          src={crypto.image} 
+                          src={getCoinImage(crypto.symbol) || crypto.image || ''} 
                           alt={crypto.name} 
-                          className="w-12 h-12 rounded-full mr-4 border border-gray-200"
+                          className="w-12 h-12 rounded-full mr-4 border border-gray-200 object-contain p-0.5"
                           onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = `https://ui-avatars.com/api/?name=${crypto.name}&background=000000&color=fff`;
+                            (e.target as HTMLImageElement).style.display = 'none';
                           }}
                         />
                         <div>

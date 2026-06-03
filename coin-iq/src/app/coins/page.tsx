@@ -7,6 +7,7 @@ import { useTopCryptos } from '@/hooks/useCryptoData';
 import { useState } from 'react';
 import { CryptoData } from '@/types/crypto';
 import { TrendingUp, TrendingDown, ArrowUpDown, Search, X, Activity, DollarSign, BarChart3, Globe } from 'lucide-react';
+import { getCoinImage } from '@/lib/coinImages';
 
 export default function CoinsPage() {
   const { cryptos, loading, error } = useTopCryptos(50);
@@ -199,15 +200,16 @@ export default function CoinsPage() {
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0 border border-gray-200">
-                            {crypto.image && typeof crypto.image === 'string' && crypto.image.startsWith('http') ? (
-                              <img src={crypto.image} alt={crypto.name} className="w-full h-full object-contain"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                  e.currentTarget.parentElement!.innerHTML = `<span class="text-xs font-bold text-gray-600">${crypto.symbol.substring(0, 2).toUpperCase()}</span>`;
-                                }} />
-                            ) : (
-                              <span className="text-xs font-bold text-gray-600">{crypto.symbol.substring(0, 2).toUpperCase()}</span>
-                            )}
+                            {(() => {
+                              const img = getCoinImage(crypto.symbol) || crypto.image;
+                              return img ? (
+                                <img src={img} alt={crypto.name}
+                                  className="w-full h-full object-contain p-0.5"
+                                  onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                              ) : (
+                                <span className="text-xs font-bold text-gray-600">{crypto.symbol.substring(0,2).toUpperCase()}</span>
+                              );
+                            })()}
                           </div>
                           <div>
                             <p className="font-semibold text-sm text-gray-900">{crypto.name}</p>
@@ -293,15 +295,15 @@ export default function CoinsPage() {
               <div className="flex items-start justify-between mb-6">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0">
-                    {selectedCrypto.image && typeof selectedCrypto.image === 'string' && selectedCrypto.image.startsWith('http') ? (
-                      <img src={selectedCrypto.image} alt={selectedCrypto.name} className="w-10 h-10 object-contain"
-                        onError={e => {
-                          e.currentTarget.style.display = 'none';
-                          e.currentTarget.parentElement!.innerHTML = `<span class="text-xl font-bold text-white">${selectedCrypto.symbol.substring(0, 2).toUpperCase()}</span>`;
-                        }} />
-                    ) : (
-                      <span className="text-xl font-bold text-white">{selectedCrypto.symbol.substring(0, 2).toUpperCase()}</span>
-                    )}
+                    {(() => {
+                      const img = getCoinImage(selectedCrypto.symbol) || selectedCrypto.image;
+                      return img ? (
+                        <img src={img} alt={selectedCrypto.name} className="w-10 h-10 object-contain"
+                          onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                      ) : (
+                        <span className="text-xl font-bold text-white">{selectedCrypto.symbol.substring(0,2).toUpperCase()}</span>
+                      );
+                    })()}
                   </div>
                   <div>
                     <div className="flex items-center gap-2 mb-0.5">

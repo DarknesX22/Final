@@ -1,4 +1,6 @@
 // Service to interact with Binance API
+import { COIN_IMAGES } from '@/lib/coinImages';
+
 const BINANCE_BASE_URL = 'https://api.binance.com/api/v3';
 
 // Map common crypto IDs to Binance trading pairs
@@ -49,28 +51,38 @@ const SYMBOL_TO_ID: Record<string, string> = {
   'ETCUSDT': 'ethereum-classic',
 };
 
-// Image URLs for common cryptocurrencies
+// Image URLs for common cryptocurrencies — now sourced from shared coinImages lib
 const CRYPTO_IMAGES: Record<string, string> = {
-  'bitcoin': 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png?1547033579',
-  'ethereum': 'https://assets.coingecko.com/coins/images/279/large/ethereum.png?1595348880',
-  'binancecoin': 'https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png?1644979850',
-  'ripple': 'https://assets.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png?1605778731',
-  'cardano': 'https://assets.coingecko.com/coins/images/975/large/cardano.png?1547034860',
-  'solana': 'https://assets.coingecko.com/coins/images/4128/large/Solana.jpg?1640133425',
-  'dogecoin': 'https://assets.coingecko.com/coins/images/5/large/dogecoin.png?1547792256',
-  'polkadot': 'https://assets.coingecko.com/coins/images/12171/large/polkadot.png?1639712644',
-  'matic-network': 'https://assets.coingecko.com/coins/images/4713/large/polygon.png?1640133425',
-  'litecoin': 'https://assets.coingecko.com/coins/images/2/large/litecoin.png?1547033579',
-  'chainlink': 'https://assets.coingecko.com/coins/images/877/large/chainlink.png?1547033579',
-  'stellar': 'https://assets.coingecko.com/coins/images/100/large/Stellar_symbol_black_RGB.png?1547033579',
-  'tron': 'https://assets.coingecko.com/coins/images/1094/large/tron-logo.png?1547035628',
-  'avalanche-2': 'https://assets.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png?1639712644',
-  'shiba-inu': 'https://assets.coingecko.com/coins/images/11939/large/shiba.png?1639712644',
-  'dai': 'https://assets.coingecko.com/coins/images/9956/large/Badge.png?1639712644',
-  'uniswap': 'https://assets.coingecko.com/coins/images/12504/large/uni.jpg?1639712644',
-  'wrapped-bitcoin': 'https://assets.coingecko.com/coins/images/7598/large/wrapped_bitcoin_wbtc.png?1547033579',
-  'the-open-network': 'https://assets.coingecko.com/coins/images/17980/large/ton_symbol.png?1639712644',
-  'ethereum-classic': 'https://assets.coingecko.com/coins/images/453/large/ethereum-classic-logo.png?1547033579',
+  'bitcoin':          COIN_IMAGES.BTC,
+  'ethereum':         COIN_IMAGES.ETH,
+  'binancecoin':      COIN_IMAGES.BNB,
+  'ripple':           COIN_IMAGES.XRP,
+  'cardano':          COIN_IMAGES.ADA,
+  'solana':           COIN_IMAGES.SOL,
+  'dogecoin':         COIN_IMAGES.DOGE,
+  'polkadot':         COIN_IMAGES.DOT,
+  'matic-network':    COIN_IMAGES.MATIC,
+  'litecoin':         COIN_IMAGES.LTC,
+  'chainlink':        COIN_IMAGES.LINK,
+  'stellar':          COIN_IMAGES.XLM,
+  'tron':             COIN_IMAGES.TRX,
+  'avalanche-2':      COIN_IMAGES.AVAX,
+  'shiba-inu':        COIN_IMAGES.SHIB,
+  'dai':              COIN_IMAGES.DAI,
+  'uniswap':          COIN_IMAGES.UNI,
+  'wrapped-bitcoin':  COIN_IMAGES.WBTC,
+  'the-open-network': COIN_IMAGES.TON,
+  'ethereum-classic': COIN_IMAGES.ETC,
+  'bitcoin-cash':     COIN_IMAGES.BCH,
+  'monero':           COIN_IMAGES.XMR,
+  'neo':              COIN_IMAGES.NEO,
+  'eos':              COIN_IMAGES.EOS,
+  'dash':             COIN_IMAGES.DASH,
+  'zcash':            COIN_IMAGES.ZEC,
+  'iota':             COIN_IMAGES.IOTA,
+  'qtum':             COIN_IMAGES.QTUM,
+  'omg-network':      COIN_IMAGES.OMG,
+  '0x':               COIN_IMAGES.ZRX,
 };
 
 // Fetches top cryptocurrencies with price, market cap, and 24h change
@@ -109,13 +121,9 @@ export async function getTopCryptos(limit: number = 10) {
         const priceChange = parseFloat(ticker.priceChange);
         const priceChangePercent = parseFloat(ticker.priceChangePercent);
         
-        // Get image URL - use CoinGecko images for known coins, placeholder for others
-        let imageUrl = CRYPTO_IMAGES[id];
-        if (!imageUrl) {
-          // Try to get from common symbol mappings
-          const symbolUpper = ticker.symbol.replace('USDT', '');
-          imageUrl = `https://placehold.co/32x32/000000/FFFFFF?text=${symbolUpper.substring(0, 2)}`;
-        }
+        // Get image URL — use shared COIN_IMAGES map first, then CRYPTO_IMAGES by id
+        const symbolUpper = ticker.symbol.replace('USDT', '');
+        const imageUrl = COIN_IMAGES[symbolUpper] || CRYPTO_IMAGES[id] || '';
         
         return {
           id: id,
@@ -346,9 +354,9 @@ export async function getCryptoDetails(id?: string) {
       symbol: id.substring(0, 3).toLowerCase(),
       name: id.charAt(0).toUpperCase() + id.slice(1),
       image: {
-        thumb: CRYPTO_IMAGES[id] || `https://placehold.co/32x32?text=${id.substring(0, 2).toUpperCase()}`,
-        small: CRYPTO_IMAGES[id] || `https://placehold.co/64x64?text=${id.substring(0, 2).toUpperCase()}`,
-        large: CRYPTO_IMAGES[id] || `https://placehold.co/128x128?text=${id.substring(0, 2).toUpperCase()}`,
+        thumb: CRYPTO_IMAGES[id] || '',
+        small: CRYPTO_IMAGES[id] || '',
+        large: CRYPTO_IMAGES[id] || '',
       },
       market_data: {
         current_price: { usd: price },
@@ -469,9 +477,9 @@ function getMockCryptoDetails(id?: string) {
     symbol: id.substring(0, 3),
     name: id.charAt(0).toUpperCase() + id.slice(1),
     image: {
-      thumb: `https://ui-avatars.com/api/?name=${id}&background=000000&color=fff`,
-      small: `https://ui-avatars.com/api/?name=${id}&background=000000&color=fff`,
-      large: `https://ui-avatars.com/api/?name=${id}&background=000000&color=fff`,
+      thumb: CRYPTO_IMAGES[id] || '',
+      small: CRYPTO_IMAGES[id] || '',
+      large: CRYPTO_IMAGES[id] || '',
     },
     market_data: {
       current_price: { usd: Math.random() * 10000 },

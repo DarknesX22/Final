@@ -4,6 +4,7 @@ import { motion } from '@/components/providers';
 import { useCryptoDetails, useTopCryptos } from '@/hooks/useCryptoData';
 import { useState, useEffect } from 'react';
 import { CryptoData } from '@/types/crypto';
+import { getCoinImage } from '@/lib/coinImages';
 
 interface PredictionData extends CryptoData {
   prediction_confidence: number;
@@ -60,13 +61,10 @@ export default function PredictionPreview() {
           <div className="flex justify-between items-center">
             <div className="flex items-center">
               <img 
-                src={selectedCrypto.image} 
+                src={getCoinImage(selectedCrypto.symbol) || selectedCrypto.image || ''}
                 alt={selectedCrypto.name} 
-                className="w-8 h-8 rounded-full mr-3"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = `https://ui-avatars.com/api/?name=${selectedCrypto.name}&background=000000&color=fff`;
-                }}
+                className="w-8 h-8 rounded-full mr-3 object-contain"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
               />
               <div>
                 <h4 className="font-medium text-sm">{selectedCrypto.name}</h4>

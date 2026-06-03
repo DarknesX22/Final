@@ -73,7 +73,7 @@ function CoinCard({ symbol, selected, onClick }: { symbol: string; selected: boo
       <div className="flex items-center gap-2.5">
         {meta.image ? (
           <img src={meta.image} alt={meta.name} className="w-8 h-8 rounded-full object-cover shrink-0"
-            onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/32x32/111/fff?text=${symbol.slice(0,2)}`; }} />
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
         ) : (
           <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold shrink-0">{symbol.slice(0, 2)}</div>
         )}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import { getCoinImage } from '@/lib/coinImages';
 
 interface TickerItem {
   id: string;
@@ -61,14 +62,18 @@ const CryptoTicker = () => {
         const res = await fetch('/api/crypto?limit=20');
         const raw = await res.json();
         setData(
-          raw.map((item: any) => ({
-            id:     item.id,
-            symbol: (item.symbol || '').toUpperCase(),
-            name:   item.name,
-            image:  typeof item.image === 'string' ? item.image : item.image?.large || '',
-            current_price:              item.current_price ?? item.price ?? 0,
-            price_change_percentage_24h: item.price_change_percentage_24h ?? item.percentChange24h ?? 0,
-          }))
+          raw.map((item: any) => {
+            const sym = (item.symbol || '').toUpperCase();
+            const rawImage = typeof item.image === 'string' ? item.image : item.image?.large || '';
+            return {
+              id:     item.id,
+              symbol: sym,
+              name:   item.name,
+              image:  getCoinImage(sym) || rawImage,
+              current_price:               item.current_price ?? item.price ?? 0,
+              price_change_percentage_24h: item.price_change_percentage_24h ?? item.percentChange24h ?? 0,
+            };
+          })
         );
       } catch { /* keep empty */ }
       finally { setLoading(false); }

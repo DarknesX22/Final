@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { CryptoData } from '@/types/crypto';
+import { COIN_IMAGES } from '@/lib/coinImages';
 
-const BINANCE_API_KEY = process.env.BINANCE_API_KEY;
-const BINANCE_API_SECRET = process.env.BINANCE_API_SECRET;
 const BINANCE_BASE_URL = 'https://api.binance.com/api/v3';
 
 // Map common crypto IDs to Binance trading pairs
@@ -19,41 +18,6 @@ const ID_TO_SYMBOL: Record<string, string> = {
   'litecoin': 'LTCUSDT',
   'chainlink': 'LINKUSDT',
   'stellar': 'XLMUSDT',
-};
-
-
-const COIN_IMAGES: Record<string, string> = {
-  BTC:  'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
-  ETH:  'https://assets.coingecko.com/coins/images/279/large/ethereum.png',
-  BNB:  'https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png',
-  XRP:  'https://assets.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png',
-  ADA:  'https://assets.coingecko.com/coins/images/975/large/cardano.png',
-  DOGE: 'https://assets.coingecko.com/coins/images/5/large/dogecoin.png',
-  LTC:  'https://assets.coingecko.com/coins/images/2/large/litecoin.png',
-  BCH:  'https://assets.coingecko.com/coins/images/780/large/bitcoin-cash-circle.png',
-  ETC:  'https://assets.coingecko.com/coins/images/453/large/ethereum-classic-logo.png',
-  TRX:  'https://assets.coingecko.com/coins/images/1094/large/tron-logo.png',
-  XLM:  'https://assets.coingecko.com/coins/images/100/large/Stellar_symbol_black_RGB.png',
-  XMR:  'https://assets.coingecko.com/coins/images/69/large/monero_logo.png',
-  NEO:  'https://assets.coingecko.com/coins/images/480/large/NEO_512_512.png',
-  EOS:  'https://assets.coingecko.com/coins/images/738/large/eos-eos-logo.png',
-  DASH: 'https://assets.coingecko.com/coins/images/19/large/dash-logo.png',
-  ZEC:  'https://assets.coingecko.com/coins/images/486/large/circle-zcash-color.png',
-  IOTA: 'https://assets.coingecko.com/coins/images/692/large/IOTA_Swirl.png',
-  QTUM: 'https://assets.coingecko.com/coins/images/684/large/qtum.png',
-  OMG:  'https://assets.coingecko.com/coins/images/776/large/OMG_Network.jpg',
-  ZRX:  'https://assets.coingecko.com/coins/images/863/large/0x.png',
-  SOL:  'https://assets.coingecko.com/coins/images/4128/large/solana.png',
-  DOT:  'https://assets.coingecko.com/coins/images/12171/large/polkadot.png',
-  MATIC:'https://assets.coingecko.com/coins/images/4713/large/matic-token-icon.png',
-  LINK: 'https://assets.coingecko.com/coins/images/877/large/chainlink-new-logo.png',
-  UNI:  'https://assets.coingecko.com/coins/images/12504/large/uniswap-uni.png',
-  AVAX: 'https://assets.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png',
-  ATOM: 'https://assets.coingecko.com/coins/images/1481/large/cosmos_hub.png',
-  SHIB: 'https://assets.coingecko.com/coins/images/11939/large/shiba.png',
-  TON:  'https://assets.coingecko.com/coins/images/17980/large/ton_symbol.png',
-  SUI:  'https://assets.coingecko.com/coins/images/26375/large/sui-ocean-square.png',
-  PEPE: 'https://assets.coingecko.com/coins/images/29850/large/pepe-token.jpeg',
 };
 
 // Function to fetch cryptocurrency data from Binance
@@ -85,7 +49,7 @@ export const getCryptoData = async (limit: number = 10): Promise<CryptoData[]> =
         volume24h:         parseFloat(t.quoteVolume || '0'),
         circulatingSupply: 0,
         totalSupply:       undefined,
-        image:             COIN_IMAGES[sym] ?? `https://placehold.co/32x32/f97316/fff?text=${sym.slice(0,2)}`,
+        image:             COIN_IMAGES[sym] ?? '',
         marketCapRank:     undefined,
         maxSupply:         undefined,
         ath:               undefined,
@@ -131,7 +95,7 @@ export const getSingleCrypto = async (id: string): Promise<CryptoData | null> =>
       volume24h: parseFloat(ticker.quoteVolume || '0'),
       circulatingSupply: 0,
       totalSupply: undefined,
-      image: `https://placehold.co/32x32?text=${id.substring(0, 2).toUpperCase()}`,
+      image: COIN_IMAGES[id.substring(0, 3).toUpperCase()] ?? '',
       marketCapRank: undefined,
       maxSupply: undefined,
       ath: undefined,

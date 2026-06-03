@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CryptoData } from '@/types/crypto';
+import { getCoinImage } from '@/lib/coinImages';
 
 interface CryptoDetails {
   id: string;
@@ -42,9 +43,12 @@ export const useTopCryptos = (limit: number = 10) => {
         // Convert API response to CryptoData format
         const convertedData = data.map((item: any) => {
           // Handle both string and object image formats
-          const imageUrl = typeof item.image === 'string' 
-            ? item.image 
+          const rawImage = typeof item.image === 'string'
+            ? item.image
             : item.image?.large || item.image?.small || item.image?.thumb;
+          // Always prefer the known CoinGecko image from our map
+          const sym = (item.symbol || '').toUpperCase();
+          const imageUrl = getCoinImage(sym) || rawImage || '';
           
           return {
             id: item.id,
@@ -57,7 +61,7 @@ export const useTopCryptos = (limit: number = 10) => {
             volume24h: item.total_volume || item.volume24h || 0,
             circulatingSupply: item.circulating_supply || item.circulatingSupply || 0,
             totalSupply: item.total_supply || item.totalSupply,
-            image: imageUrl || `https://placehold.co/32x32?text=${item.symbol?.substring(0, 2).toUpperCase() || 'CR'}`,
+            image: imageUrl || '',
             marketCapRank: item.market_cap_rank || item.marketCapRank,
             maxSupply: item.max_supply || item.maxSupply,
             ath: item.ath,

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { CryptoData } from '@/types/crypto';
 import { useState, useEffect } from 'react';
+import { getCoinImage } from '@/lib/coinImages';
 
 interface CryptoDetailsModalProps {
   isOpen: boolean;
@@ -67,13 +68,10 @@ const CryptoDetailsModal = ({ isOpen, onClose, crypto }: CryptoDetailsModalProps
             <div className="flex justify-between items-center p-6 border-b border-gray-200">
               <div className="flex items-center">
                 <img 
-                  src={crypto.image || `https://ui-avatars.com/api/?name=${crypto.name}&background=000000&color=fff`} 
+                  src={getCoinImage(crypto.symbol) || crypto.image || ''} 
                   alt={crypto.name} 
-                  className="w-16 h-16 rounded-full mr-4 border border-gray-200"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = `https://ui-avatars.com/api/?name=${crypto.name}&background=000000&color=fff`;
-                  }}
+                  className="w-16 h-16 rounded-full mr-4 border border-gray-200 object-contain p-0.5"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">{crypto.name}</h2>
