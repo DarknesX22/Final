@@ -98,6 +98,11 @@ function SourceBadge({ source }: { source: string }) {
 
 // ── Article modal ─────────────────────────────────────────────────────────────
 function ArticleModal({ article, onClose }: { article: NewsArticle; onClose: () => void }) {
+  const [fullContent, setFullContent] = useState<string>('');
+  const [fetching, setFetching]       = useState(true);
+  const [fetchError, setFetchError]   = useState(false);
+
+  // Lock scroll and handle Escape
   useEffect(() => {
     const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', h);
@@ -105,7 +110,29 @@ function ArticleModal({ article, onClose }: { article: NewsArticle; onClose: () 
     return () => { window.removeEventListener('keydown', h); document.body.style.overflow = ''; };
   }, [onClose]);
 
-  const s = SOURCE_STYLE[article.source] ?? { badge: '', bar: 'bg-gray-300' };
+  // Fetch full article from source via server-side proxy
+  useEffect(() => {
+    setFetching(true);
+    setFetchError(false);
+    setFullContent('');
+    fetch(`/api/news/article?url=${encodeURIComponent(article.url)}&source=${encodeURIComponent(article.source)}`)
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then(d => {
+        setFullContent(
+          d.content && d.content.length > 120
+            ? d.content
+            : article.body || article.description
+        );
+      })
+      .catch(() => {
+        setFetchError(true);
+        setFullContent(article.body || article.description);
+      })
+      .finally(() => setFetching(false));
+  }, [article.url, article.source, article.body, article.description]);
+
+  const s          = SOURCE_STYLE[article.source] ?? { badge: '', bar: 'bg-gray-300' };
+  const paragraphs = fullContent.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
   return (
     <AnimatePresence>
@@ -114,10 +141,7 @@ function ArticleModal({ article, onClose }: { article: NewsArticle; onClose: () 
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       >
         {/* Backdrop */}
-        <motion.div
-          className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-          onClick={onClose}
-        />
+        <motion.div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
         {/* Modal */}
         <motion.div
@@ -128,21 +152,15 @@ function ArticleModal({ article, onClose }: { article: NewsArticle; onClose: () 
           transition={{ type: 'spring', damping: 28, stiffness: 320 }}
         >
           {/* Close */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 z-10 p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-          >
+          <button onClick={onClose}
+            className="absolute top-4 right-4 z-10 p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
             <X className="w-4 h-4 text-gray-600" />
           </button>
 
           {/* Hero image */}
           <div className="aspect-[16/7] overflow-hidden rounded-t-3xl sm:rounded-t-2xl bg-gray-100">
-            <NewsImage
-              src={article.imageUrl}
-              alt={article.title}
-              source={article.source}
-              className="w-full h-full object-cover"
-            />
+            <NewsImage src={article.imageUrl} alt={article.title} source={article.source}
+              className="w-full h-full object-cover" />
           </div>
 
           <div className="p-6 sm:p-8">
@@ -152,34 +170,73 @@ function ArticleModal({ article, onClose }: { article: NewsArticle; onClose: () 
               <span className="text-gray-400 text-xs flex items-center gap-1">
                 <Clock className="w-3 h-3" /> {timeAgo(article.publishedAt)}
               </span>
-              <span className="text-gray-400 text-xs">{readMins(article.body)} min read</span>
+              {!fetching && (
+                <span className="text-gray-400 text-xs">{readMins(fullContent)} min read</span>
+              )}
             </div>
 
             {/* Accent bar */}
             <div className={`h-0.5 w-10 mb-5 rounded-full ${s.bar}`} />
 
             {/* Title */}
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 leading-snug mb-5">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 leading-snug mb-6">
               {article.title}
             </h2>
 
-            {/* Body */}
-            <p className="text-gray-600 leading-relaxed text-sm sm:text-base whitespace-pre-line">
-              {article.body || article.description}
-            </p>
+            {/* Full article body */}
+            {fetching ? (
+              /* Loading skeleton */
+              <div className="space-y-3 animate-pulse">
+                {Array.from({ length: 9 }).map((_, i) => (
+                  <div key={i} className={`h-3.5 bg-gray-100 rounded-full ${i % 5 === 4 ? 'w-2/3' : 'w-full'}`} />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {fetchError && (
+                  <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 mb-4">
+                    Showing RSS excerpt — could not load the full article from source.
+                  </p>
+                )}
+                {paragraphs.map((para, i) => {
+                  if (para.startsWith('## ')) {
+                    return <h3 key={i} className="text-base font-bold text-gray-900 mt-6 mb-1 pt-2 border-t border-gray-100">{para.replace(/^#+\s*/, '')}</h3>;
+                  }
+                  if (para.startsWith('### ')) {
+                    return <h4 key={i} className="text-sm font-bold text-gray-800 mt-4 mb-0.5">{para.replace(/^#+\s*/, '')}</h4>;
+                  }
+                  if (para.startsWith('• ')) {
+                    return (
+                      <div key={i} className="flex gap-2.5 text-sm text-gray-600 leading-relaxed">
+                        <span className="text-gray-400 shrink-0 mt-1">•</span>
+                        <span>{para.slice(2)}</span>
+                      </div>
+                    );
+                  }
+                  if (para.startsWith('"') && para.endsWith('"')) {
+                    return (
+                      <blockquote key={i} className="border-l-4 border-gray-200 pl-4 text-gray-500 italic text-sm leading-relaxed my-3">
+                        {para}
+                      </blockquote>
+                    );
+                  }
+                  return (
+                    <p key={i} className="text-gray-600 leading-relaxed text-sm sm:text-base">
+                      {para}
+                    </p>
+                  );
+                })}
+              </div>
+            )}
 
             {/* Footer */}
-            <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between gap-4 flex-wrap">
+            <div className="mt-10 pt-6 border-t border-gray-100 flex items-center justify-between gap-4 flex-wrap">
               <p className="text-xs text-gray-400">
                 Published on <span className="text-gray-700 font-medium">{article.source}</span>
               </p>
-              <a
-                href={article.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-black text-white text-sm font-semibold rounded-xl hover:bg-gray-800 transition-colors"
-              >
-                Full Article <ArrowUpRight className="w-4 h-4" />
+              <a href={article.url} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-black text-white text-sm font-semibold rounded-xl hover:bg-gray-800 transition-colors">
+                Full Article on {article.source} <ArrowUpRight className="w-4 h-4" />
               </a>
             </div>
           </div>
