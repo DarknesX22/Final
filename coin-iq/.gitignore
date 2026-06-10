@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Flask scheduler persistent state (local runtime file)
+../flask-api/scheduler_state.json

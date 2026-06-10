@@ -234,10 +234,9 @@ function ArticleModal({ article, onClose }: { article: NewsArticle; onClose: () 
               <p className="text-xs text-gray-400">
                 Published on <span className="text-gray-700 font-medium">{article.source}</span>
               </p>
-              <a href={article.url} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-black text-white text-sm font-semibold rounded-xl hover:bg-gray-800 transition-colors">
-                Full Article on {article.source} <ArrowUpRight className="w-4 h-4" />
-              </a>
+              <p className="text-xs text-gray-400">
+                {new Date(article.publishedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </p>
             </div>
           </div>
         </motion.div>

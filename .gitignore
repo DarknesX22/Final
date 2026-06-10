@@ -24,3 +24,5 @@ Thumbs.db
 
 # Local Git metadata backup from nested repositories
 .git-backups/
+
+flask-api/scheduler_state.json

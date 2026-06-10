@@ -573,24 +573,53 @@ def _save_all_predictions():
         pass
 
 
-# Start scheduler (runs immediately on startup, then every hour)
+import json as _json
+import os as _os_state
+
+# ── Persistent scheduler state ────────────────────────────────────────────────
+_STATE_FILE = _os_state.path.join(_os_state.path.dirname(__file__), "scheduler_state.json")
+
+def _load_scheduler_state() -> bool:
+    """Return True if scheduler should be running (default True if no file)."""
+    try:
+        with open(_STATE_FILE, "r") as f:
+            data = _json.load(f)
+            return bool(data.get("recording", True))
+    except (FileNotFoundError, ValueError):
+        return True  # default: start recording on first run
+
+def _save_scheduler_state(recording: bool):
+    """Persist the recording state to disk."""
+    try:
+        with open(_STATE_FILE, "w") as f:
+            _json.dump({"recording": recording}, f)
+    except Exception as e:
+        print(f"[Scheduler] Warning: could not save state: {e}")
+
+# Start scheduler — respects saved state from previous run
 _scheduler = BackgroundScheduler(daemon=True)
-_scheduler.add_job(
-    _save_all_predictions,
-    trigger="interval",
-    minutes=1,
-    id="save_predictions",
-    next_run_time=__import__("datetime").datetime.now(),  # run immediately on startup
-)
+_scheduler_should_run = _load_scheduler_state()
+
+if _scheduler_should_run:
+    _scheduler.add_job(
+        _save_all_predictions,
+        trigger="interval",
+        minutes=1,
+        id="save_predictions",
+        next_run_time=__import__("datetime").datetime.now(),
+    )
+    print("[Scheduler] Prediction saver started — runs every minute.")
+else:
+    print("[Scheduler] Prediction saver is STOPPED (saved state). Use /scheduler/start to enable.")
+
 _scheduler.start()
-print("[Scheduler] Prediction saver started — runs every minute.")
 
 
 # ── Scheduler control endpoints ───────────────────────────────────────────────
 
 @app.route("/scheduler/status", methods=["GET"])
 def scheduler_status():
-    job = _scheduler.get_job("save_predictions")
+    job     = _scheduler.get_job("save_predictions")
     running = job is not None and _scheduler.running
     return jsonify({"recording": running, "status": "running" if running else "stopped"})
 
@@ -607,6 +636,7 @@ def scheduler_start():
             next_run_time=__import__("datetime").datetime.now(),
         )
         print("[Scheduler] Recording started.")
+    _save_scheduler_state(True)   # persist: ON
     return jsonify({"recording": True, "message": "Recording started"})
 
 
@@ -616,6 +646,7 @@ def scheduler_stop():
     if job is not None:
         _scheduler.remove_job("save_predictions")
         print("[Scheduler] Recording stopped.")
+    _save_scheduler_state(False)  # persist: OFF
     return jsonify({"recording": False, "message": "Recording stopped"})
 
 
