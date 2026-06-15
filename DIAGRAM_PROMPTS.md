@@ -1,477 +1,640 @@
-# Coin-IQ — UML & Architecture Diagram Prompts
+# Coin-IQ — Mermaid Diagrams
 
-Paste each prompt into your preferred diagramming AI tool (e.g. ChatGPT, Claude, Gemini, Lucidchart AI, draw.io AI, PlantUML renderer).
+Go to https://mermaid.live → click "Code" tab → paste any block below → diagram renders instantly.
 
 ---
 
 ## 1. Use Case Diagram
 
-```
-Draw a detailed UML Use Case Diagram for the Coin-IQ cryptocurrency prediction platform.
+```mermaid
+graph TD
+    subgraph Actors
+        G([Guest])
+        U([Registered User])
+        A([Admin])
+        F([Flask ML API])
+        B([Binance API])
+        R([RSS News Feeds])
+    end
 
-Actors:
-- Guest (unauthenticated visitor)
-- Registered User (authenticated)
-- Admin
-- Flask ML API (system actor)
-- Binance API (external system)
-- RSS News Feeds (external system — CoinDesk, CoinTelegraph, Decrypt)
+    subgraph Guest Use Cases
+        UC1[View Landing Page]
+        UC2[View Crypto Ticker]
+        UC3[Browse News]
+        UC4[Sign Up via OTP]
+        UC5[Log In]
+        UC6[Forgot Password]
+    end
 
-Use Cases to include:
+    subgraph Registered User Use Cases
+        UC7[View Dashboard - Live Tab]
+        UC8[View Dashboard - History Tab]
+        UC9[Get Live Prediction for Coin]
+        UC10[View Market vs Model Accuracy]
+        UC11[Open Interval Detail Modal]
+        UC12[Start / Stop Scheduler]
+        UC13[Edit Profile]
+        UC14[Browse Markets & Coins]
+        UC15[View Analytics & Sentiment]
+        UC16[Read Full News Article in Popup]
+        UC17[Browse Learning Courses]
+        UC18[Complete a Lesson]
+        UC19[Take a Quiz]
+        UC20[Earn a Certificate]
+    end
 
-Guest:
-- View Landing Page
-- View Live Coin Ticker
-- View News Articles (read-only)
-- Sign Up (via OTP email verification)
-- Log In
-- Forgot Password
+    subgraph Admin Use Cases
+        UC21[Access Admin Dashboard]
+        UC22[View Platform Analytics]
+        UC23[Manage Users CRUD]
+        UC24[Manage LMS Courses]
+        UC25[Revoke Certificates]
+        UC26[Check Flask API Health]
+    end
 
-Registered User (extends Guest):
-- View Dashboard (Live Tab)
-- View Dashboard (History Tab)
-- View Prediction for a Coin
-- View Market vs Model Accuracy by Date
-- Open Interval Detail Modal
-- Start / Stop Prediction Recording
-- Edit Profile (name, email, password)
-- Browse Crypto Markets
-- View Coin Detail
-- View Analytics & Sentiment
-- Read News Article (in popup)
-- Browse Learning Courses
-- Complete a Lesson
-- Take a Quiz
-- Earn a Certificate
-- View Certificate
+    subgraph System Use Cases
+        UC27[Save Predictions Every Minute]
+        UC28[Lock Interval Snapshots]
+        UC29[Check Prediction Outcomes]
+    end
 
-Admin (extends Registered User):
-- Access Admin Dashboard
-- View Platform Analytics
-- Manage Users (search, delete, promote, demote)
-- Manage LMS Courses (create, edit, delete)
-- Manage Lessons and Quiz Questions
-- Revoke Certificates
-- View Activity Logs
-- Check Flask API Health
+    G --> UC1
+    G --> UC2
+    G --> UC3
+    G --> UC4
+    G --> UC5
+    G --> UC6
 
-Flask ML API (system):
-- Save Predictions every minute (scheduler)
-- Lock Interval Snapshots
-- Check Prediction Outcomes
+    U --> UC7
+    U --> UC8
+    U --> UC9
+    U --> UC10
+    U --> UC11
+    U --> UC12
+    U --> UC13
+    U --> UC14
+    U --> UC15
+    U --> UC16
+    U --> UC17
+    U --> UC18
+    U --> UC19
+    U --> UC20
 
-Binance API:
-- Provide Live OHLCV Klines
-- Provide 24h Ticker Prices
+    A --> UC21
+    A --> UC22
+    A --> UC23
+    A --> UC24
+    A --> UC25
+    A --> UC26
 
-RSS News Feeds:
-- Provide News Articles
+    F --> UC27
+    F --> UC28
+    F --> UC29
 
-Include appropriate include/extend relationships:
-- "Sign Up" includes "Verify OTP"
-- "View Dashboard History Tab" includes "Select Date"
-- "View Prediction for a Coin" includes "Run Ensemble Model"
-- "Take a Quiz" extends "Complete a Lesson"
-- "Earn a Certificate" extends "Take a Quiz"
+    UC9 --> B
+    UC27 --> B
+    UC29 --> B
+    UC3 --> R
+    UC16 --> R
+
+    UC19 -.->|extends| UC18
+    UC20 -.->|extends| UC19
+    UC4 -.->|includes| UC5
+    UC8 -.->|includes| UC10
 ```
 
 ---
 
 ## 2. Class Diagram
 
-```
-Draw a detailed UML Class Diagram for the Coin-IQ platform covering the core domain models, service classes, and their relationships.
+```mermaid
+classDiagram
+    class User {
+        +int id
+        +string name
+        +string email
+        +string passwordHash
+        +DateTime createdAt
+        +DateTime updatedAt
+    }
 
-Classes to include:
+    class Admin {
+        +int id
+        +string name
+        +string email
+        +string passwordHash
+        +string role
+        +DateTime createdAt
+    }
 
-Domain / Database Models:
-1. User { id: int, name: string, email: string, passwordHash: string, createdAt: DateTime }
-2. Admin { id: int, name: string, email: string, passwordHash: string, role: string }
-3. OtpVerification { id: int, email: string, otpCode: string, expiresAt: DateTime, verified: bool, attempts: int, lockedUntil: DateTime }
-4. LmsCourse { id: int, slug: string, title: string, description: string, level: string, lessonCount: int, quizCount: int, icon: string }
-5. LmsLesson { id: int, courseId: int, title: string, content: string, order: int }
-6. LmsQuizQuestion { id: int, courseId: int, question: string, options: string[], correctAnswer: string }
-7. LmsUserProgress { id: int, userId: int, courseId: int, completedLessons: int[], quizPassed: bool, completed: bool }
-8. LmsCertificate { id: int, userId: int, courseId: int, certificateId: string, issuedAt: DateTime }
-9. PredictionHistory { id: int, coin: string, predictedAt: DateTime, priceAtPrediction: float, ensembleDirection: string, ensembleProbability: float, outcomePrice: float, wasCorrect: bool }
-10. IntervalSnapshot { id: int, sessionId: string, coin: string, intervalMinutes: int, predictedAt: DateTime, priceAtPrediction: float, ensembleDirection: string, ensembleProbability: float, actualDirection: string, outcomePrice: float, wasCorrect: bool, lockedAt: DateTime }
-11. NewsArticle { id: int, articleId: string, title: string, source: string, publishedAt: DateTime, description: string, body: string, url: string, imageUrl: string }
+    class OtpVerification {
+        +int id
+        +string email
+        +string otpCode
+        +DateTime expiresAt
+        +bool verified
+        +int attempts
+        +DateTime lockedUntil
+    }
 
-Service Classes:
-12. UserService { createUser(), findUserByEmail(), verifyPassword(), updateUserProfile() }
-13. AdminService { findAdminByEmail(), createAdmin(), deleteAdmin() }
-14. SessionService { createToken(user): string, verifyToken(token): Payload }
-15. AdminSessionService { signAdminToken(admin): string, verifyAdminToken(token): Payload }
-16. LmsDbSync { syncLmsToDb(): void }
-17. CryptoService { getCryptoData(limit): CryptoData[], getSingleCrypto(id): CryptoData }
-18. CoingeckoApiService { getTopCryptos(limit): CryptoData[], getCryptoDetails(id): CryptoDetails, getCryptoHistory(id, days): HistoryData }
+    class LmsCourse {
+        +int id
+        +string slug
+        +string title
+        +string description
+        +string level
+        +int lessonCount
+        +int quizCount
+        +string icon
+    }
 
-Flask ML Classes (Python):
-19. XGBoostPredictor { models: dict, thresholds: dict, predict(coin, features): PredictionResult }
-20. LGBMPredictor { model, scaler, featureCols: list, predict(features): PredictionResult }
-21. RandomForestPredictor { model, scaler, featureCols: list, predict(features): PredictionResult }
-22. LSTMPredictor { model, scaler, metadata, predict(sequence): PredictionResult }
-23. BinanceFeatureBuilder { fetchKlines(symbol): DataFrame, addIndicators(df): DataFrame, addSentiment(df, coin): DataFrame, buildFeaturesForCoin(symbol): FeatureSet }
-24. NewsSentimentService { getRssArticles(): list, computeSentiment(articles): dict, getSentiment(coin): SentimentScore }
+    class LmsLesson {
+        +int id
+        +int courseId
+        +string title
+        +string content
+        +int order
+    }
 
-Relationships:
-- User 1 --o< LmsUserProgress (one user has many progress records)
-- User 1 --o< LmsCertificate
-- LmsCourse 1 --o< LmsLesson
-- LmsCourse 1 --o< LmsQuizQuestion
-- LmsCourse 1 --o< LmsUserProgress
-- LmsCourse 1 --o< LmsCertificate
-- XGBoostPredictor, LGBMPredictor, RandomForestPredictor, LSTMPredictor are used by EnsembleOrchestrator
-- BinanceFeatureBuilder feeds into all four ML predictors
-- NewsSentimentService feeds into BinanceFeatureBuilder (adds sentiment features)
+    class LmsQuizQuestion {
+        +int id
+        +int courseId
+        +string question
+        +string[] options
+        +string correctAnswer
+    }
+
+    class LmsUserProgress {
+        +int id
+        +int userId
+        +int courseId
+        +int[] completedLessons
+        +bool quizPassed
+        +bool completed
+    }
+
+    class LmsCertificate {
+        +int id
+        +int userId
+        +int courseId
+        +string certificateId
+        +DateTime issuedAt
+    }
+
+    class PredictionHistory {
+        +int id
+        +string coin
+        +DateTime predictedAt
+        +float priceAtPrediction
+        +string ensembleDirection
+        +float ensembleProbability
+        +float outcomePrice
+        +bool wasCorrect
+    }
+
+    class IntervalSnapshot {
+        +int id
+        +string sessionId
+        +string coin
+        +int intervalMinutes
+        +DateTime predictedAt
+        +float priceAtPrediction
+        +string ensembleDirection
+        +string actualDirection
+        +float outcomePrice
+        +bool wasCorrect
+        +DateTime lockedAt
+    }
+
+    class NewsArticle {
+        +int id
+        +string title
+        +string source
+        +DateTime publishedAt
+        +string description
+        +string body
+        +string url
+        +string imageUrl
+    }
+
+    class XGBoostPredictor {
+        +dict models
+        +dict thresholds
+        +predict(coin, features) PredictionResult
+    }
+
+    class LGBMPredictor {
+        +model
+        +scaler
+        +list featureCols
+        +predict(features) PredictionResult
+    }
+
+    class RandomForestPredictor {
+        +model
+        +scaler
+        +list featureCols
+        +predict(features) PredictionResult
+    }
+
+    class LSTMPredictor {
+        +model
+        +scaler
+        +metadata
+        +predict(sequence) PredictionResult
+    }
+
+    class BinanceFeatureBuilder {
+        +fetchKlines(symbol) DataFrame
+        +addIndicators(df) DataFrame
+        +addSentiment(df, coin) DataFrame
+        +buildFeaturesForCoin(symbol) FeatureSet
+    }
+
+    class NewsSentimentService {
+        +getRssArticles() list
+        +computeSentiment(articles) dict
+        +getSentiment(coin) SentimentScore
+    }
+
+    class EnsembleOrchestrator {
+        +runAllModels(coin) EnsembleResult
+        +computeEnsemble(results) direction, probability
+    }
+
+    User "1" --> "many" LmsUserProgress
+    User "1" --> "many" LmsCertificate
+    LmsCourse "1" --> "many" LmsLesson
+    LmsCourse "1" --> "many" LmsQuizQuestion
+    LmsCourse "1" --> "many" LmsUserProgress
+    LmsCourse "1" --> "many" LmsCertificate
+    EnsembleOrchestrator --> XGBoostPredictor
+    EnsembleOrchestrator --> LGBMPredictor
+    EnsembleOrchestrator --> RandomForestPredictor
+    EnsembleOrchestrator --> LSTMPredictor
+    BinanceFeatureBuilder --> EnsembleOrchestrator
+    NewsSentimentService --> BinanceFeatureBuilder
 ```
 
 ---
 
 ## 3. Activity Diagram
 
-```
-Draw a detailed UML Activity Diagram for the "User Makes a Prediction" workflow in the Coin-IQ platform.
+```mermaid
+flowchart TD
+    Start([User Opens Dashboard]) --> CheckAuth{Auth Token\nValid?}
+    CheckAuth -- No --> ShowLogin[Show Login / Signup Form]
+    ShowLogin --> Login[User Logs In]
+    Login --> CheckAuth
+    CheckAuth -- Yes --> LoadDash[Load Dashboard Shell]
 
-Start: User opens the Dashboard page.
+    LoadDash --> FetchProfile[Fetch User Profile\nfrom PostgreSQL]
+    LoadDash --> FetchCrypto[Fetch Top 20 Coins\nfrom Binance via /api/crypto]
 
-Flow:
-1. System checks auth_token cookie
-2. [Not authenticated] → Show inline Login/Signup form → User logs in → Redirect to Dashboard
-3. [Authenticated] → Load Dashboard
-4. Dashboard fetches user profile from PostgreSQL
-5. Dashboard fetches top 20 crypto prices from Binance API (via Next.js /api/crypto)
-6. Dashboard triggers parallel prediction fetches for all 20 coins (via /flask-api/live/predict/:coin)
+    FetchProfile --> ShowDash[Render Dashboard UI]
+    FetchCrypto --> ShowDash
 
-   For each coin (parallel swim lane — Flask):
-   a. Fetch 1h OHLCV klines from Binance
-   b. Compute 80+ technical indicators (EMA, RSI, MACD, Bollinger, etc.)
-   c. Fetch RSS news → compute VADER sentiment
-   d. Run XGBoost predictor
-   e. Run LightGBM predictor
-   f. Run Random Forest predictor
-   g. Run LSTM predictor (24-step sequence)
-   h. Compute ensemble: average probabilities → direction (UP/DOWN) + confidence
+    ShowDash --> TriggerPreds[Trigger Parallel Prediction\nRequests for all 20 Coins]
 
-7. Next.js receives prediction response
-8. Display prediction card (coin, price, signal, probability, RSI, risk level, 4-model arrows, suggestion badge)
-9. Fire-and-forget: POST to /api/predictions/save
-   a. Insert into prediction_history
-   b. Insert pending rows in interval_snapshots (10min, 20min, 30min, 1h, 2h, 6h, 12h, 24h)
+    subgraph Flask ML - Per Coin
+        FetchKlines[Fetch 1h Klines\nfrom Binance]
+        ComputeIndicators[Compute 80+ Technical\nIndicators - RSI MACD BB EMA]
+        FetchSentiment[Fetch RSS News\nCompute VADER Sentiment]
+        RunXGB[Run XGBoost]
+        RunLGBM[Run LightGBM]
+        RunRF[Run Random Forest]
+        RunLSTM[Run LSTM]
+        Ensemble[Compute Ensemble\nAvg Probability + Direction]
 
-10. User switches to History tab
-11. User selects a date
-12. System fetches /api/predictions/daily?date=YYYY-MM-DD
-13. Trigger /api/predictions/lock-intervals (background)
-14. Display interval accuracy cards (8 intervals, coin icons with green/red borders)
-15. User clicks "View" on an interval → Open detail modal with full coin prediction table
+        FetchKlines --> ComputeIndicators
+        ComputeIndicators --> FetchSentiment
+        FetchSentiment --> RunXGB
+        FetchSentiment --> RunLGBM
+        FetchSentiment --> RunRF
+        FetchSentiment --> RunLSTM
+        RunXGB --> Ensemble
+        RunLGBM --> Ensemble
+        RunRF --> Ensemble
+        RunLSTM --> Ensemble
+    end
 
-End.
+    TriggerPreds --> FetchKlines
+    Ensemble --> ShowCard[Render Prediction Card\nCoin, Price, Signal, RSI, Risk, Models]
 
-Use swim lanes for: Browser/User, Next.js Server, Flask ML API, PostgreSQL, Binance API
+    ShowCard --> SavePred[POST /api/predictions/save\nFire and Forget]
+    SavePred --> InsertHistory[INSERT prediction_history]
+    SavePred --> InsertSnapshots[INSERT interval_snapshots\n8 rows - 10min to 24h]
+
+    ShowCard --> UserTab{User Switches\nto History Tab?}
+    UserTab -- Yes --> SelectDate[User Selects a Date]
+    SelectDate --> FetchDaily[GET /api/predictions/daily\ndate=YYYY-MM-DD]
+    FetchDaily --> LockIntervals[Trigger lock-intervals\nBackground]
+    FetchDaily --> ShowCards[Display 8 Interval\nAccuracy Cards]
+    ShowCards --> ClickView{User Clicks\nView Button?}
+    ClickView -- Yes --> OpenModal[Open Interval Detail Modal\nFull Coin Prediction Table]
+    ClickView -- No --> End([End])
+    OpenModal --> End
+    UserTab -- No --> End
 ```
 
 ---
 
 ## 4. Sequence Diagram
 
-```
-Draw a detailed UML Sequence Diagram for the "Live Prediction Flow" in Coin-IQ.
+```mermaid
+sequenceDiagram
+    actor Browser
+    participant NextJS as Next.js App
+    participant Flask as Flask API
+    participant XGB as XGBoost
+    participant LGBM as LightGBM
+    participant RF as Random Forest
+    participant LSTM as LSTM
+    participant Binance as Binance API
+    participant PG as PostgreSQL
 
-Participants (left to right):
-Browser, Next.js App, Flask API, XGBoost Model, LightGBM Model, Random Forest Model, LSTM Model, Binance API, PostgreSQL DB
+    Browser->>NextJS: GET /dashboard (auth_token cookie)
+    NextJS->>PG: SELECT * FROM users WHERE id = <jwt_sub>
+    PG-->>NextJS: User profile row
+    NextJS-->>Browser: Render dashboard shell (loading)
 
-Sequence:
+    Browser->>Flask: GET /flask-api/live/predict/BTCUSDT
+    Flask->>Binance: GET /klines?symbol=BTCUSDT&interval=1h&limit=200
+    Binance-->>Flask: 200 OHLCV rows
+    Flask->>Flask: addIndicators() - RSI, MACD, BB, EMA, etc.
+    Flask->>Flask: getSentiment("BTCUSDT") - VADER from RSS cache
 
-1. Browser → Next.js App: GET /dashboard (with auth_token cookie)
-2. Next.js App → PostgreSQL DB: SELECT user WHERE id = <from JWT>
-3. PostgreSQL DB → Next.js App: User profile row
-4. Next.js App → Browser: Render dashboard shell (loading state)
-5. Browser → Flask API: GET /flask-api/live/predict/BTCUSDT
-6. Flask API → Binance API: GET /klines?symbol=BTCUSDT&interval=1h&limit=200
-7. Binance API → Flask API: OHLCV kline data (200 rows)
-8. Flask API → Flask API: compute_indicators() — RSI, MACD, Bollinger, EMA, etc.
-9. Flask API → Flask API: get_sentiment("BTCUSDT") — VADER scores from RSS cache
-10. Flask API → XGBoost Model: predict(features_row)
-11. XGBoost Model → Flask API: { direction: "UP", probability: 0.72 }
-12. Flask API → LightGBM Model: predict(features_row)
-13. LightGBM Model → Flask API: { direction: "UP", probability: 0.68 }
-14. Flask API → Random Forest Model: predict(features_row)
-15. Random Forest Model → Flask API: { direction: "UP", probability: 0.71 }
-16. Flask API → LSTM Model: predict(sequence_24_rows)
-17. LSTM Model → Flask API: { direction: "UP", probability: 0.65 }
-18. Flask API → Flask API: ensemble = avg(0.72, 0.68, 0.71, 0.65) = 0.69 → "UP", confidence="38%"
-19. Flask API → Browser: JSON { coin, market: {close_price, rsi, macd}, models: {...}, ensemble: {direction, probability, confidence} }
-20. Browser → Browser: Render prediction card
-21. Browser → Next.js App: POST /api/predictions/save { coin, ensemble_direction, ensemble_probability, ... }
-22. Next.js App → PostgreSQL DB: INSERT INTO prediction_history (...)
-23. Next.js App → PostgreSQL DB: INSERT INTO interval_snapshots (8 rows, locked_at=NULL)
-24. PostgreSQL DB → Next.js App: OK
-25. Next.js App → Browser: 200 OK (silent)
+    Flask->>XGB: predict(features_row)
+    XGB-->>Flask: direction=UP, probability=0.72
+
+    Flask->>LGBM: predict(features_row)
+    LGBM-->>Flask: direction=UP, probability=0.68
+
+    Flask->>RF: predict(features_row)
+    RF-->>Flask: direction=UP, probability=0.71
+
+    Flask->>LSTM: predict(sequence_24_rows)
+    LSTM-->>Flask: direction=UP, probability=0.65
+
+    Flask->>Flask: ensemble = avg(0.72,0.68,0.71,0.65) = 0.69
+    Flask-->>Browser: JSON { coin, market, models, ensemble{UP, 0.69, 38%} }
+
+    Browser->>Browser: Render prediction card
+
+    Browser->>NextJS: POST /api/predictions/save
+    NextJS->>PG: INSERT INTO prediction_history (...)
+    NextJS->>PG: INSERT INTO interval_snapshots (8 rows, locked_at=NULL)
+    PG-->>NextJS: OK
+    NextJS-->>Browser: 200 OK (silent)
+
+    Note over Browser,PG: User switches to History Tab
+
+    Browser->>NextJS: GET /api/predictions/daily?date=2026-06-10
+    NextJS->>Binance: GET /ticker/price (outcome prices for lock-intervals)
+    Binance-->>NextJS: current prices
+    NextJS->>PG: UPDATE interval_snapshots SET was_correct, outcome_price WHERE elapsed
+    NextJS->>PG: SELECT intervals + coins WHERE date = 2026-06-10
+    PG-->>NextJS: interval groups with accuracy
+    NextJS-->>Browser: { intervals: [...], overall: {...}, coin_summary: [...] }
+    Browser->>Browser: Render 8 interval accuracy cards with coin icons
 ```
 
 ---
 
 ## 5. Component Diagram
 
-```
-Draw a detailed UML Component Diagram for the Coin-IQ platform showing all major software components and their dependencies/interfaces.
+```mermaid
+graph TB
+    subgraph Browser["🌐 Browser Layer"]
+        Pages["React Pages\nDashboard / Predictions / News\nLearn / Admin / Markets"]
+        UIComp["Shared UI Components\nNavbar / Footer / CryptoTicker\nEditProfileModal / AuthModal"]
+        Charts["Chart Components\nCandlestickChart / LineChart\nRiskAssessment"]
+        PredDash["PredictionDashboard\nComponent"]
+    end
 
-Components:
+    subgraph NextJS["⚙️ Next.js Server :3000"]
+        AuthAPI["Auth API Module\n/api/auth/*"]
+        ProfileAPI["Profile API\n/api/profile"]
+        AdminAPI["Admin API Module\n/api/admin/*"]
+        CryptoAPI["Crypto API\n/api/crypto/*"]
+        NewsAPI["News API\n/api/news + /api/news/article"]
+        PredAPI["Predictions API\n/api/predictions/*"]
+        LmsAPI["LMS API\n/api/learn/*"]
+        Proxy["Next.js Rewrite Proxy\n/flask-api/* → :5000/*"]
+        Middleware["Auth Middleware\nRoute protection"]
+    end
 
-[Browser Layer]
-- React Pages Component (Dashboard, Predictions, News, Learn, Admin, Markets, About, Legal)
-- Shared UI Components (Navbar, Footer, CryptoTicker, EditProfileModal, AuthModal)
-- Chart Components (CandlestickChart, LineChart, RiskAssessment)
-- PredictionDashboard Component
+    subgraph Flask["🐍 Flask ML API :5000"]
+        FlaskCore["Flask App Core\nRouting + CORS"]
+        XGBComp["XGBoost Predictor\n20 per-coin models"]
+        LGBMComp["LightGBM Predictor\n1 universal model"]
+        RFComp["Random Forest Predictor\n1 universal model"]
+        LSTMComp["LSTM Predictor\nKeras sequential"]
+        FeatEng["Binance Feature Builder\n80+ indicators"]
+        SentSvc["News Sentiment Service\nRSS + VADER"]
+        Scheduler["APScheduler\nsave_predictions every 1 min"]
+        StateFile["Persistent State Manager\nscheduler_state.json"]
+    end
 
-[Next.js Server Layer]
-- Auth API Module (/api/auth/login, signup, otp, logout, me, forgot-password)
-- Profile API Module (/api/profile)
-- Admin API Module (/api/admin/auth, data, users, lms)
-- Crypto API Module (/api/crypto, /api/crypto/[id], /api/crypto/history)
-- News API Module (/api/news, /api/news/article)
-- Predictions API Module (/api/predictions/save, history, daily, lock-intervals, check-outcomes)
-- LMS API Module (/api/learn/courses, progress, quiz, certificate)
-- Next.js Rewrite Proxy (rewrites /flask-api/* → http://localhost:5000/*)
+    subgraph Data["🗄️ Data Layer"]
+        PG[("PostgreSQL :5432\ncoin_iq database")]
+        Models[("ML Model Files\nfilesystem Models/")]
+    end
 
-[Flask ML API Layer]
-- Flask App Core (routing, CORS, startup)
-- XGBoost Predictor (20 per-coin models)
-- LightGBM Predictor (1 universal model)
-- Random Forest Predictor (1 universal model)
-- LSTM Predictor (Keras sequential model)
-- Binance Feature Builder (klines + 80+ indicators)
-- News Sentiment Service (RSS + VADER)
-- APScheduler (save_predictions job + lock_intervals job)
-- Persistent State Manager (scheduler_state.json)
+    subgraph External["🌍 External Services"]
+        BinanceExt["Binance Public API"]
+        RSS["RSS Feeds\nCoinDesk / CoinTelegraph\nDecrypt"]
+        EmailJS["EmailJS\nOTP + Password Email"]
+        CoinGecko["CoinGecko CDN\nCoin Images"]
+    end
 
-[Data Layer]
-- PostgreSQL Database
-  - users, admins, otp_verifications tables
-  - lms_courses, lms_lessons, lms_quiz_questions, lms_user_progress, lms_certificates tables
-  - prediction_history, interval_snapshots tables
-  - news_articles table
-- Model Artifacts Store (filesystem: Models/)
-  - XGBoost JSON files (per coin)
-  - LightGBM PKL + scaler
-  - Random Forest PKL + scaler
-  - LSTM .keras + scaler + metadata
+    Pages --> NextJS
+    UIComp --> NextJS
+    PredDash --> Proxy
+    Proxy --> FlaskCore
 
-[External Services]
-- Binance Public API (market data)
-- CoinDesk RSS Feed
-- CoinTelegraph RSS Feed
-- Decrypt RSS Feed
-- EmailJS (OTP and password emails)
+    AuthAPI --> PG
+    ProfileAPI --> PG
+    AdminAPI --> PG
+    PredAPI --> PG
+    LmsAPI --> PG
+    NewsAPI --> PG
+    CryptoAPI --> BinanceExt
+    NewsAPI --> RSS
+    AuthAPI --> EmailJS
 
-Interfaces / connections:
-- React Pages ↔ Next.js Server: HTTP fetch (internal)
-- Next.js Server ↔ PostgreSQL: pg Pool (SQL)
-- Next.js Server → Flask API: HTTP (via rewrite proxy)
-- Flask API → Binance: HTTP REST
-- Flask API → RSS Feeds: HTTP + XML parse
-- Flask API → PostgreSQL: psycopg2 (interval locking)
-- Flask APScheduler → Next.js /api/predictions/save: HTTP POST
-- Browser ↔ Flask API: HTTP (via Next.js proxy rewrite)
+    FlaskCore --> FeatEng
+    FeatEng --> XGBComp
+    FeatEng --> LGBMComp
+    FeatEng --> RFComp
+    FeatEng --> LSTMComp
+    FeatEng --> BinanceExt
+    SentSvc --> RSS
+    SentSvc --> FeatEng
+    XGBComp --> Models
+    LGBMComp --> Models
+    RFComp --> Models
+    LSTMComp --> Models
+    Scheduler --> FlaskCore
+    Scheduler --> StateFile
+    Flask --> PG
 ```
 
 ---
 
 ## 6. Deployment Diagram
 
-```
-Draw a detailed UML Deployment Diagram for the Coin-IQ platform in its local development configuration.
+```mermaid
+graph TB
+    subgraph DevMachine["💻 Developer Machine - Windows 10/11"]
 
-Nodes and artifacts:
+        subgraph NodeRuntime["Node.js 20 Runtime - Port 3000"]
+            NextApp["coin-iq/\nNext.js 16 Application\nPages + API Routes + Middleware"]
+        end
 
-Node 1: Developer Machine (Windows 10/11)
-  - Artifact: coin-iq/ (Next.js 16 application)
-    - Execution Environment: Node.js 20 runtime
-    - Port: 3000
-    - Contains: React pages, API routes, middleware
-    - Config: next.config.ts (rewrites /flask-api/* to http://localhost:5000/*)
-  
-  - Artifact: flask-api/ (Python 3.x Flask application)
-    - Execution Environment: Python 3.10+ with venv
-    - Port: 5000
-    - Contains: app.py, binance_features.py, news_sentiment.py, model classes
-    - Reads: scheduler_state.json (persistent scheduler state)
-  
-  - Artifact: Models/ (ML model artifacts — filesystem)
-    - XGBoost JSON files (one per coin)
-    - LightGBM .pkl + scaler.pkl
-    - Random Forest .pkl + scaler.pkl
-    - LSTM .keras + scaler.pkl + metadata.pkl
-  
-  - Artifact: PostgreSQL 14+ (database server)
-    - Port: 5432
-    - Database: coin_iq
-    - Tables: users, admins, otp_verifications, password_reset_tokens,
-              lms_courses, lms_lessons, lms_quiz_questions, lms_user_progress, lms_certificates,
-              prediction_history, interval_snapshots, news_articles
+        subgraph PythonRuntime["Python 3.10+ Runtime - Port 5000"]
+            FlaskApp["flask-api/\nFlask ML API\napp.py + models/"]
+            StateJSON["scheduler_state.json\nPersistent scheduler ON/OFF"]
+        end
 
-Node 2: External Services (Internet)
-  - Binance Public API (https://api.binance.com)
-    - Used by: Flask API (klines, ticker), Next.js /api/crypto
-  - CoinDesk RSS (https://www.coindesk.com/arc/outboundfeeds/rss/)
-  - CoinTelegraph RSS (https://cointelegraph.com/rss)
-  - Decrypt RSS (https://decrypt.co/feed)
-  - EmailJS (https://api.emailjs.com) — OTP + password reset emails
-  - CoinGecko CDN (https://assets.coingecko.com) — coin logo images
+        subgraph ModelStore["Filesystem - Models/"]
+            XGBFiles["xgboost_70_export/\n*.json - 1 per coin"]
+            LGBMFiles["LightBGM/\nlgbm_model.pkl + scaler"]
+            RFFiles["Random Forest/\nrf_model.pkl + scaler"]
+            LSTMFiles["LSTM/\nlstm_model.keras + scaler + metadata"]
+        end
 
-Node 3: User's Browser
-  - React 19 client application
-  - Communicates with Next.js on localhost:3000
+        subgraph DBServer["PostgreSQL 14+ - Port 5432"]
+            DB[("coin_iq database\nusers, admins, otp_verifications\nlms_courses, lms_lessons\nlms_quiz_questions, lms_user_progress\nlms_certificates\nprediction_history\ninterval_snapshots\nnews_articles")]
+        end
 
-Communication paths:
-- Browser ↔ Next.js (HTTP, port 3000)
-- Next.js ↔ Flask (HTTP, port 5000, via rewrite proxy for /flask-api/*)
-- Next.js ↔ PostgreSQL (TCP, port 5432)
-- Flask ↔ PostgreSQL (TCP, port 5432)
-- Flask ↔ Binance (HTTPS)
-- Flask ↔ RSS Feeds (HTTPS)
-- Next.js ↔ Binance (HTTPS, for /api/crypto)
-- Next.js ↔ RSS Feeds (HTTPS, for /api/news)
-- Next.js ↔ EmailJS (HTTPS, for OTP/password emails)
-```
+        NextApp -- "TCP :5432\npg Pool" --> DB
+        FlaskApp -- "TCP :5432\npsycopg2" --> DB
+        FlaskApp -- "reads" --> ModelStore
+        FlaskApp -- "reads/writes" --> StateJSON
+        NextApp -- "HTTP :5000\nrewrite proxy" --> FlaskApp
+    end
 
----
+    subgraph UserBrowser["🌐 User Browser"]
+        Browser["Chrome / Firefox / Edge\nReact 19 Client"]
+    end
 
-## 7. DFD Diagram (Level 0 — Context Diagram)
+    subgraph Internet["🌍 External Services"]
+        Binance["api.binance.com\nPublic REST API"]
+        CoinDeskRSS["coindesk.com RSS"]
+        CTelegraphRSS["cointelegraph.com RSS"]
+        DecryptRSS["decrypt.co RSS"]
+        EmailJSExt["api.emailjs.com\nOTP + Password Emails"]
+        CGeckoCDN["assets.coingecko.com\nCoin Logo Images"]
+    end
 
-```
-Draw a Data Flow Diagram Level 0 (Context Diagram) for the Coin-IQ cryptocurrency prediction platform.
-
-Central Process: Coin-IQ System
-
-External Entities (with data flows):
-
-1. User (Registered)
-   → Login credentials, signup details, OTP code, profile updates, lesson completions, quiz answers → Coin-IQ System
-   ← Prediction results, market data, news articles, course content, certificates, dashboard analytics ← Coin-IQ System
-
-2. Guest (Unauthenticated)
-   → Page requests → Coin-IQ System
-   ← Landing page, ticker data, news list ← Coin-IQ System
-
-3. Admin
-   → Admin credentials, user management commands, LMS course/lesson/quiz data → Coin-IQ System
-   ← Admin dashboard analytics, user lists, LMS stats, activity logs ← Coin-IQ System
-
-4. Binance API (External)
-   ← Market data requests (klines, 24h ticker) ← Coin-IQ System
-   → OHLCV price data, volume, percentage change → Coin-IQ System
-
-5. News RSS Feeds (CoinDesk, CoinTelegraph, Decrypt)
-   ← RSS feed requests ← Coin-IQ System
-   → News article XML (title, body, image, url, date) → Coin-IQ System
-
-6. EmailJS Service
-   ← OTP email request, auto-password email request ← Coin-IQ System
-   → Email delivery confirmation → Coin-IQ System
-
-Data stores referenced (shown as open-ended rectangles):
-- PostgreSQL DB
-- ML Model Files (filesystem)
-- scheduler_state.json
+    Browser -- "HTTP :3000" --> NextApp
+    NextApp -- "HTTPS" --> Binance
+    NextApp -- "HTTPS" --> CoinDeskRSS
+    NextApp -- "HTTPS" --> CTelegraphRSS
+    NextApp -- "HTTPS" --> DecryptRSS
+    NextApp -- "HTTPS" --> EmailJSExt
+    Browser -- "HTTPS" --> CGeckoCDN
+    FlaskApp -- "HTTPS" --> Binance
+    FlaskApp -- "HTTPS" --> CoinDeskRSS
+    FlaskApp -- "HTTPS" --> CTelegraphRSS
+    FlaskApp -- "HTTPS" --> DecryptRSS
 ```
 
 ---
 
-## 8. DFD Diagram Level 1
+## 7. DFD Level 0 — Context Diagram
 
+```mermaid
+graph LR
+    U([Registered User]) -- "credentials, OTP,\nprofile updates,\nlesson completions,\nquiz answers" --> SYS
+    SYS -- "predictions, market data,\nnews, courses,\ncertificates, dashboard" --> U
+
+    G([Guest]) -- "page requests" --> SYS
+    SYS -- "landing page,\nticker data, news list" --> G
+
+    AD([Admin]) -- "admin credentials,\nuser management,\nLMS content commands" --> SYS
+    SYS -- "analytics, user lists,\nLMS stats, activity logs" --> AD
+
+    SYS((Coin-IQ\nSystem)) -- "klines request\nticker request" --> BIN([Binance API])
+    BIN -- "OHLCV price data\nvolume, % change" --> SYS
+
+    SYS -- "RSS fetch request" --> RSS([CoinDesk\nCoinTelegraph\nDecrypt RSS])
+    RSS -- "news XML articles" --> SYS
+
+    SYS -- "OTP email request\npassword email request" --> EJS([EmailJS])
+    EJS -- "delivery confirmation" --> SYS
+
+    SYS -- "coin logo requests" --> CDN([CoinGecko CDN])
+    CDN -- "coin logo images" --> SYS
 ```
-Draw a Data Flow Diagram Level 1 for the Coin-IQ cryptocurrency prediction platform.
-Decompose the central Coin-IQ System into its major internal processes.
 
-Internal Processes:
+---
 
-P1: Authentication & User Management
-  - Inputs: login credentials, signup form, OTP, profile updates
-  - Outputs: auth tokens (JWT cookies), user profile data, OTP emails
-  - Data stores: D1 (users table), D2 (otp_verifications table), D3 (admins table)
-  - External: User, Admin, EmailJS
+## 8. DFD Level 1
 
-P2: Live Market Data Service
-  - Inputs: crypto data requests from browser
-  - Outputs: top coin prices, coin details, historical klines
-  - Data stores: none (no caching — all from Binance)
-  - External: Binance API
-  - Feeds into: P3, P5, Browser
+```mermaid
+flowchart TD
+    U([User])
+    AD([Admin])
+    BIN([Binance API])
+    RSS([RSS Feeds])
+    EJS([EmailJS])
 
-P3: ML Prediction Engine (Flask)
-  - Inputs: coin symbol from browser/scheduler
-  - Outputs: prediction result (direction, probability, confidence, 4-model breakdown)
-  - Internal sub-processes:
-    3a. Feature Engineering (Binance klines → 80+ technical indicators)
-    3b. Sentiment Analysis (RSS → VADER scores)
-    3c. XGBoost Prediction
-    3d. LightGBM Prediction
-    3e. Random Forest Prediction
-    3f. LSTM Prediction
-    3g. Ensemble Voting (average → direction + confidence)
-  - Data stores: D4 (ML Model Files)
-  - External: Binance API, RSS Feeds
+    D1[(D1 users\nadmins)]
+    D2[(D2 otp_verifications)]
+    D3[(D3 prediction_history\ninterval_snapshots)]
+    D4[(D4 ML Model Files)]
+    D5[(D5 lms_courses\nlms_lessons\nlms_quiz_questions\nlms_user_progress\nlms_certificates)]
+    D6[(D6 news_articles)]
+    D7[(D7 scheduler_state.json)]
 
-P4: Prediction Persistence & History
-  - Inputs: prediction results from P3, current prices from Binance
-  - Outputs: historical accuracy data, interval accuracy cards, per-coin summaries
-  - Sub-processes:
-    4a. Save Prediction (insert into prediction_history + interval_snapshots)
-    4b. Lock Interval Snapshots (compare outcome price after elapsed time)
-    4c. Check Daily Records (group by date + interval)
-    4d. Check Outcomes (update was_correct after 24h)
-  - Data stores: D5 (prediction_history), D6 (interval_snapshots)
-  - External: Binance API (outcome prices)
+    P1["P1\nAuthentication &\nUser Management"]
+    P2["P2\nLive Market\nData Service"]
+    P3["P3\nML Prediction\nEngine - Flask"]
+    P4["P4\nPrediction Persistence\n& History"]
+    P5["P5\nNews Aggregation\n& Storage"]
+    P6["P6\nLearning Management\nSystem"]
+    P7["P7\nAdmin Dashboard"]
+    P8["P8\nScheduler &\nAutomation"]
 
-P5: News Aggregation & Storage
-  - Inputs: RSS feed data
-  - Outputs: paginated news list, full article content (scraped)
-  - Sub-processes:
-    5a. Fetch & Parse RSS Feeds
-    5b. Extract Images & Body
-    5c. Persist to DB (ON CONFLICT DO NOTHING)
-    5d. Scrape Full Article (proxy server-side fetch)
-  - Data stores: D7 (news_articles)
-  - External: CoinDesk RSS, CoinTelegraph RSS, Decrypt RSS
+    U -- "credentials, OTP, profile" --> P1
+    P1 -- "auth token, profile data" --> U
+    P1 -- "OTP email" --> EJS
+    P1 <--> D1
+    P1 <--> D2
 
-P6: Learning Management System (LMS)
-  - Inputs: course browse requests, lesson completions, quiz submissions
-  - Outputs: course list + progress, quiz grading, certificate issuance
-  - Sub-processes:
-    6a. Sync Course Data to DB (lmsData.ts seed)
-    6b. Track Lesson Progress
-    6c. Grade Quiz & Issue Certificate
-    6d. Serve Certificate (public)
-  - Data stores: D8 (lms_courses, lms_lessons, lms_quiz_questions), D9 (lms_user_progress, lms_certificates)
-  - External: User
+    U -- "crypto data request" --> P2
+    P2 -- "coin prices, details" --> U
+    P2 <--> BIN
 
-P7: Admin Dashboard
-  - Inputs: admin auth, management commands (CRUD users, LMS, certificates)
-  - Outputs: analytics summaries, user lists, activity logs, LMS stats
-  - Data stores: D1 (users), D3 (admins), D8 (LMS courses), D9 (LMS progress/certs)
-  - External: Admin
+    U -- "request prediction\nfor coin" --> P3
+    P3 -- "prediction result\nUP/DOWN, probability" --> U
+    P3 <--> BIN
+    P3 <--> RSS
+    P3 <--> D4
 
-P8: Scheduler & Automation
-  - Inputs: timer tick (every 1 minute), scheduler_state.json (ON/OFF state)
-  - Outputs: triggers P3 for each coin, triggers P4 lock & check-outcomes
-  - Sub-processes:
-    8a. Read persistent state (scheduler_state.json)
-    8b. Save predictions job (calls P3 → P4 for all 20 coins)
-    8c. Lock intervals job (updates D6 with outcomes)
-    8d. Write persistent state on start/stop
-  - Data stores: D10 (scheduler_state.json)
+    P3 -- "prediction result" --> P4
+    P4 -- "accuracy history\ninterval cards" --> U
+    P4 <--> D3
+    P4 <--> BIN
 
-Data stores summary:
-D1 — users table
-D2 — otp_verifications table
-D3 — admins table
-D4 — ML Model Files (filesystem)
-D5 — prediction_history table
-D6 — interval_snapshots table
-D7 — news_articles table
-D8 — lms_courses, lms_lessons, lms_quiz_questions tables
-D9 — lms_user_progress, lms_certificates tables
-D10 — scheduler_state.json
+    U -- "browse news\nopen article" --> P5
+    P5 -- "paginated news list\nfull article content" --> U
+    P5 <--> RSS
+    P5 <--> D6
+
+    U -- "courses, lessons\nquiz, certificate" --> P6
+    P6 -- "course content\nprogress, certificates" --> U
+    P6 <--> D5
+
+    AD -- "management commands" --> P7
+    P7 -- "analytics, logs, lists" --> AD
+    P7 <--> D1
+    P7 <--> D5
+
+    P8 -- "triggers every 1 min" --> P3
+    P8 -- "triggers lock" --> P4
+    P8 <--> D7
+    D7 -- "ON/OFF state" --> P8
 ```
