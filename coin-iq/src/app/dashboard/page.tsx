@@ -561,7 +561,9 @@ export default function DashboardPage() {
       finally { setLoading(false); }
     })();
     ALL_COINS.forEach(c => fetchCoin(c.coin));
-  }, [fetchCoin]);
+    // Fetch scheduler status on mount so the Start/Stop button always reflects real state
+    fetchRecordingStatus();
+  }, [fetchCoin, fetchRecordingStatus]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -945,19 +947,27 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   {/* Recording indicator */}
-                  {recording !== null && (
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl">
-                      <span className={`w-2 h-2 rounded-full ${recording ? 'bg-emerald-400 animate-pulse' : 'bg-gray-500'}`} />
-                      <span className="text-xs text-gray-300 font-medium">{recording ? 'Recording' : 'Stopped'}</span>
-                    </div>
-                  )}
-                  <button onClick={toggleRecording}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-colors ${
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl">
+                    <span className={`w-2 h-2 rounded-full transition-colors ${
+                      recording === null ? 'bg-gray-600 animate-pulse' :
+                      recording ? 'bg-emerald-400 animate-pulse' : 'bg-gray-500'
+                    }`} />
+                    <span className="text-xs text-gray-300 font-medium">
+                      {recording === null ? 'Checking…' : recording ? 'Recording' : 'Stopped'}
+                    </span>
+                  </div>
+                  <button
+                    onClick={toggleRecording}
+                    disabled={recording === null}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                       recording
                         ? 'bg-rose-500 hover:bg-rose-600 text-white'
                         : 'bg-emerald-500 hover:bg-emerald-600 text-white'
                     }`}>
-                    {recording ? <><Square className="w-3 h-3" /> Stop</> : <><Play className="w-3 h-3" /> Start</>}
+                    {recording
+                      ? <><Square className="w-3 h-3" /> Stop Recording</>
+                      : <><Play className="w-3 h-3" /> Start Recording</>
+                    }
                   </button>
                   <button onClick={() => { if (selectedDate) fetchDailyRecords(selectedDate); fetchAvailableDates(); }}
                     disabled={dailyLoading}

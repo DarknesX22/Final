@@ -47,7 +47,8 @@ export async function GET(request: NextRequest) {
     if (datesOnly) {
       const rows = await db.query(`
         SELECT DISTINCT DATE(predicted_at AT TIME ZONE 'UTC') AS day
-        FROM prediction_history
+        FROM interval_snapshots
+        WHERE DATE(predicted_at AT TIME ZONE 'UTC') < CURRENT_DATE
         ORDER BY day DESC
         LIMIT 30
       `);
